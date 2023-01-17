@@ -54,3 +54,26 @@ def get_snakes_by_species_id(species_id):
                 result = snake.__dict__
                 snakes.append(result)
     return snakes
+
+def get_single_snake(id):
+    with sqlite3.connect("./snakes.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT *
+        FROM Snakes sn
+        WHERE sn.id = ?
+        """, (id, ))
+
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create a species instance from the current row
+        snake = Snake(data['id'], data['name'], data['owner_id'],
+                      data['species_id'], data['gender'], data['color'])
+
+
+    return snake.__dict__

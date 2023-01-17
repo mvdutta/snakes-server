@@ -1,7 +1,7 @@
 from urllib.parse import urlparse, parse_qs
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_species, get_single_species, get_all_snakes, get_snakes_by_species_id
+from views import get_all_species, get_single_species, get_all_snakes, get_snakes_by_species_id, get_single_snake, get_all_owners, get_single_owner
 
 
 # Here's a class. It inherits from another class.
@@ -50,12 +50,20 @@ class HandleRequests(BaseHTTPRequestHandler):
                 else:
                     response = get_all_species()
             elif resource == "snakes":
-                response = get_all_snakes()
+                if id is not None: 
+                    response = get_single_snake(id)
+                else:
+                    response = get_all_snakes()
+            elif resource == "owners":
+                if id is not None:
+                    response = get_single_owner(id)
+                else:
+                    response = get_all_owners()
         else: # There is a ? in the path, run the query param functions
             (resource, query) = parsed
             # see if the query dictionary has a species key
-            if query.get('species_id') and resource == 'snakes':
-                response = get_snakes_by_species_id(query['species_id'][0])
+            if query.get('species') and resource == 'snakes':
+                response = get_snakes_by_species_id(query['species'][0])
         
         # Send a JSON formatted string as a response
         self.wfile.write(json.dumps(response).encode())

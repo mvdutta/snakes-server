@@ -37,7 +37,6 @@ def get_all_species():
     return all_species
 
 def get_single_species(id):
-    print("Helloooo")
     with sqlite3.connect("./snakes.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
@@ -57,6 +56,5 @@ def get_single_species(id):
 
         # Create a species instance from the current row
         species = Species(data['id'], data['name'])
-        print(species)
 
     return species.__dict__
