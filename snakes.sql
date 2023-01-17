@@ -69,3 +69,6 @@ SELECT
     sp.name
 FROM Species sp
 WHERE sp.id = 1
+
+SELECT *
+FROM Snakes sn

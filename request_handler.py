@@ -1,6 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_species, get_single_species
+from views import get_all_species, get_single_species, get_all_snakes
 
 
 # Here's a class. It inherits from another class.
@@ -55,6 +55,8 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = get_single_species(id)
             else:
                 response = get_all_species()
+        elif resource == "snakes":
+            response = get_all_snakes()
         # Send a JSON formatted string as a response
         self.wfile.write(json.dumps(response).encode())
 
