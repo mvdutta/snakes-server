@@ -1,5 +1,7 @@
+from urllib.parse import urlparse, parse_qs
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from views import get_all_species, get_single_species, get_all_snakes, get_snakes_by_species_id
 
 
 # Here's a class. It inherits from another class.
@@ -12,31 +14,49 @@ class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
     """
 
-    # Here's a class function
+    def parse_url(self, path):
+        """Parse the url into the resource and id"""
+        parsed_url = urlparse(path)
+        path_params = parsed_url.path.split('/')  # ['', 'snakes', 1]
+        resource = path_params[1]
 
-    # Here's a method on the class that overrides the parent's method.
-    # It handles any GET request.
+        if parsed_url.query:
+            query = parse_qs(parsed_url.query)
+            return (resource, query)
+
+        pk = None
+        try:
+            pk = int(path_params[2])
+        except (IndexError, ValueError):
+            pass
+        return (resource, pk) 
+
     def do_GET(self):
         """Handles GET requests to the server
         """
         # Set the response code to 'Ok'
         self._set_headers(200)
 
-        # Your new console.log() that outputs to the terminal
-        print(self.path)
+        response = {}  # Default response
+        # Parse the URL and capture the tuple that is returned in a variable
+        parsed = self.parse_url(self.path)
+    #If the path does not include a query parameter, continue with the original if block
+        if '?' not in self.path:
+            ( resource, id ) = parsed
 
-        # It's an if..else statement
-        if self.path == "/animals":
-            # In Python, this is a list of dictionaries
-            # In JavaScript, you would call it an array of objects
-            response = [
-                {"id": 1, "name": "Snickers", "species": "Dog"},
-                {"id": 2, "name": "Lenny", "species": "Cat"}
-            ]
-
-        else:
-            response = []
-
+            if resource == "species":
+                if id is not None:
+                    response = get_single_species(id)
+                else:
+                    response = get_all_species()
+            elif resource == "snakes":
+                response = get_all_snakes()
+        else: # There is a ? in the path, run the query param functions
+            (resource, query) = parsed
+            # see if the query dictionary has a species key
+            if query.get('species_id') and resource == 'snakes':
+                response = get_snakes_by_species_id(query['species_id'][0])
+        
         # Send a JSON formatted string as a response
         self.wfile.write(json.dumps(response).encode())
 
