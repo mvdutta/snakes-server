@@ -15,7 +15,7 @@ def get_all_species():
         db_cursor.execute("""
         SELECT
             sp.id,
-            sp.name,
+            sp.name
         FROM Species sp
         """)
 
@@ -36,4 +36,4 @@ def get_all_species():
 
             all_species.append(species.__dict__)
 
-    return species
+    return all_species

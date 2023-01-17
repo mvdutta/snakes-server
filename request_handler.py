@@ -1,5 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from views import get_all_species
 
 
 # Here's a class. It inherits from another class.
@@ -22,18 +23,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Set the response code to 'Ok'
         self._set_headers(200)
 
-        # Your new console.log() that outputs to the terminal
-        print(self.path)
+        response = {}  # Default response
 
         # It's an if..else statement
-        if self.path == "/animals":
+        if self.path == "/species":
             # In Python, this is a list of dictionaries
             # In JavaScript, you would call it an array of objects
-            response = [
-                {"id": 1, "name": "Snickers", "species": "Dog"},
-                {"id": 2, "name": "Lenny", "species": "Cat"}
-            ]
-
+            response = get_all_species()
         else:
             response = []
 
