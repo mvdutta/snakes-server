@@ -72,3 +72,7 @@ WHERE sp.id = 1
 
 SELECT *
 FROM Snakes sn
+
+SELECT *
+FROM Snakes sn
+WHERE sn.species_id = 3
