@@ -64,3 +64,8 @@ insert into Snakes (id, name, owner_id, species_id, gender, color) values (28, '
 insert into Snakes (id, name, owner_id, species_id, gender, color) values (29, 'Stéphanie', 8, 5, 'Female', 'Purple');
 insert into Snakes (id, name, owner_id, species_id, gender, color) values (30, 'Liè', 7, 1, 'Female', 'Maroon');
 
+SELECT
+    sp.id,
+    sp.name
+FROM Species sp
+WHERE sp.id = 1

@@ -6,8 +6,6 @@ from models import Species
 def get_all_species():
     # Open a connection to the database
     with sqlite3.connect("./snakes.sqlite3") as conn:
-
-        # Just use these. It's a Black Box.
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
@@ -37,3 +35,28 @@ def get_all_species():
             all_species.append(species.__dict__)
 
     return all_species
+
+def get_single_species(id):
+    print("Helloooo")
+    with sqlite3.connect("./snakes.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT
+            sp.id,
+            sp.name
+        FROM Species sp
+        WHERE sp.id = ?
+        """, (id, ))
+
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create a species instance from the current row
+        species = Species(data['id'], data['name'])
+        print(species)
+
+    return species.__dict__
