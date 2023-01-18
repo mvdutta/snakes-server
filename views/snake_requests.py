@@ -1,5 +1,4 @@
 import sqlite3
-import json
 from models import Snake
 
 
@@ -54,3 +53,66 @@ def get_snakes_by_species_id(species_id):
                 result = snake.__dict__
                 snakes.append(result)
     return snakes
+
+def get_single_snake(id):
+    with sqlite3.connect("./snakes.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT 
+            sn.id,
+            sn.name,
+            sn.owner_id,
+            sn.species_id,
+            sn.gender,
+            sn.color,
+            sp.name species_name
+        FROM Snakes sn
+        JOIN Species sp
+            ON sn.species_id = sp.id
+        WHERE sn.id = ?
+        """, (id, ))
+
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+        ####### Check if snake found, if not return empty dictionary
+        if not data:
+            return {}
+        if data['species_name'] == "Aonyx cinerea":
+            response = {
+                "msg": "Invalid inquiry. Aonyx cinerea only lives in colonies."
+            }
+            return response
+        # Create a species instance from the current row
+        snake = Snake(data['id'], data['name'], data['owner_id'],
+                      data['species_id'], data['gender'], data['color'])
+
+    return snake.__dict__
+
+def create_snake(new_snake):
+    with sqlite3.connect("./snakes.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        INSERT INTO Snakes
+            ( name, owner_id, species_id, gender, color )
+        VALUES
+            ( ?, ?, ?, ?, ?);
+        """, (new_snake['name'], new_snake['owner_id'],
+              new_snake['species_id'], new_snake['gender'],
+              new_snake['color'], ))
+
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
+
+        # Add the `id` property to the snake dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_snake['id'] = id
+
+    return new_snake
