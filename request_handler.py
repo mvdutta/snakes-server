@@ -1,7 +1,7 @@
 from urllib.parse import urlparse, parse_qs
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_species, get_single_species, get_all_snakes, get_snakes_by_species_id, get_single_snake, get_all_owners, get_single_owner
+from views import get_all_species, get_single_species, get_all_snakes, get_snakes_by_species_id, get_single_snake, create_snake, get_all_owners, get_single_owner
 
 
 # Here's a class. It inherits from another class.
@@ -35,8 +35,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         """Handles GET requests to the server
         """
         # Set the response code to 'Ok'
-        self._set_headers(200)
-
+        
         response = {}  # Default response
         # Parse the URL and capture the tuple that is returned in a variable
         parsed = self.parse_url(self.path)
@@ -50,7 +49,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 else:
                     response = get_all_species()
             elif resource == "snakes":
-                if id is not None: 
+                if id is not None:
                     response = get_single_snake(id)
                 else:
                     response = get_all_snakes()
@@ -66,20 +65,48 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = get_snakes_by_species_id(query['species'][0])
         
         # Send a JSON formatted string as a response
+        if not response:
+            self._set_headers(404)
+        else:
+            self._set_headers(200)
         self.wfile.write(json.dumps(response).encode())
 
     # Here's a method on the class that overrides the parent's method.
     # It handles any POST request.
     def do_POST(self):
         """Handles POST requests to the server"""
-
-        # Set response code to 'Created'
-        self._set_headers(201)
-
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-        response = {"payload": post_body}
-        self.wfile.write(json.dumps(response).encode())
+        # Convert JSON string to a Python dictionary
+        post_body = json.loads(post_body)
+        parsed = self.parse_url(self.path)
+        (resource, id) = parsed
+
+        # Initialize new snake
+        new_snake = None
+        if resource == "snakes":
+            # if all keys are in post-body:
+            keys = ['name', 'owner_id', 'species_id', 'gender', 'color']
+            if has_all_keys(post_body, keys):
+                self._set_headers(201)
+                new_snake = create_snake(post_body)
+            else:
+                self._set_headers(400)
+                # create a dictionary with one key called message and store it in new_animal using a Python version of a ternary statement
+
+                # make a list of the keys in post_body using the built-in keys() function and convert it into python list using list(...). Call this post_body_keys
+                post_body_keys = list(post_body.keys())
+
+                # use a list comprehension to find those keys in "keys" that are not present in post_body_keys
+                missing_keys = [
+                    key for key in keys if key not in post_body_keys]
+                msg = ", ".join(missing_keys) + " missing. Please update."
+
+                new_snake = {
+                    "message": msg
+                }
+        # Encode the new animal and send in response
+            self.wfile.write(json.dumps(new_snake).encode())
 
     # A method that handles any PUT request.
     def do_PUT(self):
@@ -111,6 +138,13 @@ class HandleRequests(BaseHTTPRequestHandler):
                          'X-Requested-With, Content-Type, Accept')
         self.end_headers()
 
+
+def has_all_keys(dict, key_list):
+    '''Checks if the dictionary dict has all the keys in the list key_list. Returns false if any of the keys are not found, and true if all the keys are found'''
+    for key in key_list:
+        if key not in dict:
+            return False
+    return True
 
 # This function is not inside the class. It is the starting
 # point of this application.
