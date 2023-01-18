@@ -67,7 +67,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Send a JSON formatted string as a response
         if not response:
             self._set_headers(404)
-        elif response.get('msg'):
+        elif isinstance(response, dict) and response.get('msg'):
             self._set_headers(405)
         else:
             self._set_headers(200)
