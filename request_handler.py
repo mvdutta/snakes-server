@@ -34,8 +34,6 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_GET(self):
         """Handles GET requests to the server
         """
-        # Set the response code to 'Ok'
-        
         response = {}  # Default response
         # Parse the URL and capture the tuple that is returned in a variable
         parsed = self.parse_url(self.path)
@@ -111,23 +109,35 @@ class HandleRequests(BaseHTTPRequestHandler):
                 # use a list comprehension to find those keys in "keys" that are not present in post_body_keys
                 missing_keys = [
                     key for key in keys if key not in post_body_keys]
-                msg = ", ".join(missing_keys) + " missing. Please update."
+                msg = "Missing keys: "  + ", ".join(missing_keys) + ". Please update."
 
                 new_snake = {
                     "message": msg
                 }
-                self.wfile.write(json.dumps(new_snake).encode())
+                # self.wfile.write(json.dumps(new_snake).encode())
         else:
             new_snake = {}
             self._set_headers(404)
 
         # Encode the new animal and send in response
-            self.wfile.write(json.dumps(new_snake).encode())
+        self.wfile.write(json.dumps(new_snake).encode())
 
     # A method that handles any PUT request.
     def do_PUT(self):
         """Handles PUT requests to the server"""
-        self.do_PUT()
+        response = {
+            "msg": "This operation is not supported"
+        }
+        self._set_headers(404)
+        self.wfile.write(json.dumps(response).encode())
+
+    def do_DELETE(self):
+        """method to process the DELETE request. Uses response code 204: request processed, no information to send back/don't need to refresh"""
+        response = {
+            "msg": "This operation is not supported"
+        }
+        self._set_headers(404)
+        self.wfile.write(json.dumps(response).encode())
 
     def _set_headers(self, status):
         # Notice this Docstring also includes information about the arguments passed to the function
