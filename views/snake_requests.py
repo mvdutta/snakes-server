@@ -63,8 +63,17 @@ def get_single_snake(id):
         # Use a ? parameter to inject a variable's value
         # into the SQL statement.
         db_cursor.execute("""
-        SELECT *
+        SELECT 
+            sn.id,
+            sn.name,
+            sn.owner_id,
+            sn.species_id,
+            sn.gender,
+            sn.color,
+            sp.name species_name
         FROM Snakes sn
+        JOIN Species sp
+            ON sn.species_id = sp.id
         WHERE sn.id = ?
         """, (id, ))
 
@@ -73,14 +82,16 @@ def get_single_snake(id):
         ####### Check if snake found, if not return empty dictionary
         if not data:
             return {}
-
+        if data['species_name'] == "Aonyx cinerea":
+            response = {
+                "msg": "Invalid inquiry. Aonyx cinerea only lives in colonies."
+            }
+            return response
         # Create a species instance from the current row
         snake = Snake(data['id'], data['name'], data['owner_id'],
                       data['species_id'], data['gender'], data['color'])
 
-
     return snake.__dict__
-
 
 def create_snake(new_snake):
     with sqlite3.connect("./snakes.sqlite3") as conn:
