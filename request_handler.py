@@ -58,6 +58,8 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_owner(id)
                 else:
                     response = get_all_owners()
+            else:
+                response = {}
         else: # There is a ? in the path, run the query param functions
             (resource, query) = parsed
             # see if the query dictionary has a species key
@@ -78,6 +80,13 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handles POST requests to the server"""
         content_len = int(self.headers.get('content-length', 0))
+        if content_len == 0:
+            self._set_headers(404)
+            response = {
+                "message": "No content sent"
+            }
+            self.wfile.write(json.dumps(response).encode())
+            return
         post_body = self.rfile.read(content_len)
         # Convert JSON string to a Python dictionary
         post_body = json.loads(post_body)
@@ -98,7 +107,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
                 # make a list of the keys in post_body using the built-in keys() function and convert it into python list using list(...). Call this post_body_keys
                 post_body_keys = list(post_body.keys())
-
+                print(post_body_keys)
                 # use a list comprehension to find those keys in "keys" that are not present in post_body_keys
                 missing_keys = [
                     key for key in keys if key not in post_body_keys]
@@ -107,6 +116,11 @@ class HandleRequests(BaseHTTPRequestHandler):
                 new_snake = {
                     "message": msg
                 }
+                self.wfile.write(json.dumps(new_snake).encode())
+        else:
+            new_snake = {}
+            self._set_headers(404)
+
         # Encode the new animal and send in response
             self.wfile.write(json.dumps(new_snake).encode())
 
